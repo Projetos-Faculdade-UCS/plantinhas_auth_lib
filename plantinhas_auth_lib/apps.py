@@ -37,8 +37,8 @@ class PlantinhasAuthLibConfig(AppConfig):
             db_config.setdefault("OPTIONS", {})
 
             # Set TIME_ZONE to prevent KeyError in Django's check_settings
-            # Using empty string instead of None for type compatibility
-            db_config.setdefault("TIME_ZONE", "")
+            # Using 'UTC' to provide a valid timezone for ZoneInfo
+            db_config.setdefault("TIME_ZONE", "UTC")
 
             # Add other common database settings that might be checked
             db_config.setdefault("CONN_MAX_AGE", 0)
