@@ -27,9 +27,15 @@ class PlantinhasAuthLibConfig(AppConfig):
 
         if auth_db_url:
             # Use dj_database_url to parse the database URL
-            databases["auth_db"] = dj_database_url.parse(auth_db_url)
+            db_config = dj_database_url.parse(auth_db_url)
+            # Ensure ATOMIC_REQUESTS is set to prevent KeyError
+            db_config.setdefault("ATOMIC_REQUESTS", False)
+            databases["auth_db"] = db_config
         else:
             raise ValueError(
                 "AUTH_DB_URL is not set. "
                 "Please set it in your settings or as an environment variable."
             )
+
+        # Update Django's settings
+        settings.DATABASES = databases
