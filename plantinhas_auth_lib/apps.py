@@ -30,6 +30,8 @@ class PlantinhasAuthLibConfig(AppConfig):
             db_config = dj_database_url.parse(auth_db_url)
             # Ensure ATOMIC_REQUESTS is set to prevent KeyError
             db_config.setdefault("ATOMIC_REQUESTS", False)
+            # Ensure OPTIONS key exists to prevent KeyError in PostgreSQL backend
+            db_config.setdefault("OPTIONS", {})
             databases["auth_db"] = db_config
         else:
             raise ValueError(
