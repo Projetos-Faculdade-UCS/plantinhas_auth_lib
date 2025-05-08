@@ -20,9 +20,7 @@ class JWTRemoteAuthBackend(BaseBackend):
         payload = jwt.decode(token, settings.AUTH_PUBLIC_KEY, algorithms=["RS256"])
         user_id = payload["sub"]
 
-        user, _ = User.objects.using("auth_db").get_or_create(
-            id=user_id, defaults={"username": username}
-        )
+        user = User.objects.using("auth_db").get(id=user_id)
         # Set JWT token as a non-database attribute (will not be persisted)
         user.jwt_token = token  # type: ignore
         return user
