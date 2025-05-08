@@ -51,9 +51,32 @@ class JWTRemoteAuthBackend(BaseBackend):
                 "Please ensure AUTH_BASE_URL is set in your settings."
             )
 
-        user_id = payload["sub"]
+        # Try to get user ID from various possible JWT claims
+        user_id = None
+        # First, try to get from configured claim name, defaulting to "sub"
+        user_id_claim = getattr(settings, "JWT_USER_ID_CLAIM", "sub")
 
-        user = User.objects.using("auth_db").get(id=user_id)
+        if user_id_claim in payload:
+            user_id = payload[user_id_claim]
+        else:
+            # Try common alternative claim names
+            for claim in ["id", "user_id", "userId", "userid", "user", "uuid"]:
+                if claim in payload:
+                    user_id = payload[claim]
+                    break
+
+        if not user_id:
+            # Print payload for debugging
+            print(
+                f"JWT payload missing user ID claim. Available claims: {list(payload.keys())}"
+            )
+            return None
+
+        # Get user from database
+        try:
+            user = User.objects.using("auth_db").get(id=user_id)
+        except User.DoesNotExist:
+            return None
         # Set JWT token as a non-database attribute (will not be persisted)
         user.jwt_token = token  # type: ignore
         return user
