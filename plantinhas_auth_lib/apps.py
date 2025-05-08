@@ -1,8 +1,6 @@
-import os
-
-import dj_database_url
 from django.apps import AppConfig
 from django.conf import settings
+from environ import Env
 
 
 class PlantinhasAuthLibConfig(AppConfig):
@@ -10,6 +8,7 @@ class PlantinhasAuthLibConfig(AppConfig):
     verbose_name = "Auth Library"
 
     def ready(self):
+        env = Env()
         # ensure our auth_db router is installed
         routers = list(getattr(settings, "DATABASE_ROUTERS", []))
         routers.insert(0, "plantinhas_auth_lib.db_router.AuthRouter")
@@ -22,14 +21,4 @@ class PlantinhasAuthLibConfig(AppConfig):
 
         databases = getattr(settings, "DATABASES", {})
 
-        # Use AUTH_DB_URL if available
-        auth_db_url = getattr(settings, "AUTH_DB_URL", os.environ.get("AUTH_DB_URL"))
-
-        if auth_db_url:
-            # Use dj_database_url to parse the database URL
-            databases["auth_db"] = dj_database_url.parse(auth_db_url)
-        else:
-            raise ValueError(
-                "AUTH_DB_URL is not set. "
-                "Please set it in your settings or as an environment variable."
-            )
+        databases["auth_db"] = env.db("AUTH_DB_URL")

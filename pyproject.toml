@@ -14,7 +14,7 @@ maintainers = [
 keywords = ["django", "authentication", "jwt", "plantinhas"]
 requires-python = ">=3.13.2"
 dependencies = [
-    "dj-database-url>=2.3.0",
+    "django-environ==0.12.0",
     "django>=5.2.1",
     "djangorestframework-simplejwt>=5.5.0",
     "pyjwt>=2.9.0",
