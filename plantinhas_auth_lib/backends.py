@@ -27,8 +27,24 @@ class JWTRemoteAuthBackend(BaseBackend):
 
         # Use JWKS endpoint if available, otherwise fall back to static public key
         if self.jwks_client:
-            signing_key = self.jwks_client.get_signing_key_from_jwt(token)
-            payload = jwt.decode(token, signing_key.key, algorithms=["RS256"])
+            try:
+                # First try the normal method that requires "kid" in token header
+                signing_key = self.jwks_client.get_signing_key_from_jwt(token)
+                payload = jwt.decode(token, signing_key.key, algorithms=["RS256"])
+            except jwt.exceptions.PyJWKClientError:
+                # If the token doesn't have a "kid", try all available keys
+                jwks = self.jwks_client.get_jwk_set()
+                for signing_key in jwks.keys:
+                    try:
+                        payload = jwt.decode(
+                            token, signing_key.key, algorithms=["RS256"]
+                        )
+                        break
+                    except jwt.exceptions.InvalidTokenError:
+                        continue
+                else:
+                    # If none of the keys worked, authentication fails
+                    return None
         else:
             raise ValueError(
                 "JWKS client not initialized. "
