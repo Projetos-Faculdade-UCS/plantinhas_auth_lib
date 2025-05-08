@@ -28,10 +28,23 @@ class PlantinhasAuthLibConfig(AppConfig):
         if auth_db_url:
             # Use dj_database_url to parse the database URL
             db_config = dj_database_url.parse(auth_db_url)
+
+            # Add all required database configuration settings
             # Ensure ATOMIC_REQUESTS is set to prevent KeyError
             db_config.setdefault("ATOMIC_REQUESTS", False)
+
             # Ensure OPTIONS key exists to prevent KeyError in PostgreSQL backend
             db_config.setdefault("OPTIONS", {})
+
+            # Set TIME_ZONE to prevent KeyError in Django's check_settings
+            # Using empty string instead of None for type compatibility
+            db_config.setdefault("TIME_ZONE", "")
+
+            # Add other common database settings that might be checked
+            db_config.setdefault("CONN_MAX_AGE", 0)
+            db_config.setdefault("CONN_HEALTH_CHECKS", False)
+            db_config.setdefault("AUTOCOMMIT", True)
+
             databases["auth_db"] = db_config
         else:
             raise ValueError(
