@@ -83,10 +83,9 @@ AUTH_DB_URL = "postgresql://user:password@localhost:5432/auth_db"
 # Authentication Service URL (required)
 AUTH_SERVICE_TOKEN_URL = "https://auth.example.com/api/token/"
 
-# Public key for verifying JWT tokens (required)
-AUTH_PUBLIC_KEY = """-----BEGIN PUBLIC KEY-----
-YOUR_PUBLIC_KEY_HERE
------END PUBLIC KEY-----"""
+# Authentication Service Base URL (required)
+# The library will fetch JWT keys from the {AUTH_BASE_URL}/.well-known/jwks.json endpoint
+AUTH_BASE_URL = "https://auth.example.com"
 ```
 
 ### 3. Database Configuration
@@ -109,7 +108,7 @@ DATABASES = {
 When a user tries to authenticate, the `JWTRemoteAuthBackend` sends the credentials to the specified `AUTH_SERVICE_TOKEN_URL`. If authentication is successful, it:
 
 1. Receives a JWT token from the authentication service
-2. Verifies the token using the provided public key
+2. Retrieves the appropriate public key from the JWKS endpoint and verifies the token
 3. Extracts the user ID from the token
 4. Creates or retrieves the user from the auth database
 5. Attaches the JWT token to the user object for future authenticated requests
@@ -166,7 +165,7 @@ pytest
    - Make sure `AUTH_DB_URL` is properly set in your settings or as an environment variable
 
 2. **JWT Verification Failed**
-   - Verify that `AUTH_PUBLIC_KEY` is correctly set and matches the private key used by the authentication service
+   - Verify that the JWKS endpoint at `{AUTH_BASE_URL}/.well-known/jwks.json` is accessible and contains the correct public keys
 
 3. **ConnectionError: Could not connect to auth service**
    - Check that `AUTH_SERVICE_TOKEN_URL` is correct and the authentication service is running
