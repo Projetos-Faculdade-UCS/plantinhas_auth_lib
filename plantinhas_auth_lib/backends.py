@@ -68,7 +68,8 @@ class JWTRemoteAuthBackend(BaseBackend):
         if not user_id:
             # Print payload for debugging
             print(
-                f"JWT payload missing user ID claim. Available claims: {list(payload.keys())}"
+                "JWT payload missing user ID claim."
+                f"Available claims: {list(payload.keys())}"
             )
             return None
 
