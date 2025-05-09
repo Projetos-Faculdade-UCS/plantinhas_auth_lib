@@ -10,6 +10,7 @@ class PlantinhasAuthLibConfig(AppConfig):
     verbose_name = "Auth Library"
 
     def ready(self):
+        print("Initializing Plantinhas Auth Library...")
         # ensure our auth_db router is installed
         routers = list(getattr(settings, "DATABASE_ROUTERS", []))
         routers.insert(0, "plantinhas_auth_lib.db_router.AuthRouter")
